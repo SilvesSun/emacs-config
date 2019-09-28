@@ -32,14 +32,24 @@ This function should only modify configuration layer settings."
 
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(python
+   '(
+     dap
+     lsp
+     (python :variables
+             python-indent-offset 4
+             python-backend 'lsp
+             python-shell-interpreter-args "-i"
+             python-indent-guess-indent-offset nil
+             )
      go
      ;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
      ;; Uncomment some layer names and press `SPC f e R' (Vim style) or
      ;; `M-m f e R' (Emacs style) to install them.
      ;; ----------------------------------------------------------------
-     auto-completion
+     (auto-completion
+      :variables
+      auto-completion-enable-snippets-in-popup t)
      ;; better-defaults
      emacs-lisp
      git
@@ -51,7 +61,7 @@ This function should only modify configuration layer settings."
      ;;        shell-default-height 30
      ;;        shell-default-position 'bottom)
      ;; spell-checking
-     ;; syntax-checking
+     syntax-checking
      treemacs
      version-control
      javascript
@@ -211,7 +221,7 @@ It should only modify the values of Spacemacs settings."
 
    ;; Default font or prioritized list of fonts.
    dotspacemacs-default-font '("Source Code Pro"
-                               :size 10.0
+                               :size 12.0
                                :weight normal
                                :width normal)
 
@@ -456,8 +466,9 @@ This function is called immediately after `dotspacemacs/init', before layer
 configuration.
 It is mostly for variables that should be set before packages are loaded.
 If you are unsure, try setting them in `dotspacemacs/user-config' first."
+
+  (setenv "WORKON_HOME" "C:\\Users\\sksun\\Envs")
   )
- 
 (setq configuration-layer-elpa-archives
     '(("melpa-cn" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")
       ("org-cn"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/org/")
@@ -476,16 +487,13 @@ This function is called at the very end of Spacemacs startup, after layer
 configuration.
 Put your configuration code here, except for variables that should be set
 before packages are loaded."
-  (require 'vue-mode)
-  (add-to-list 'vue-mode-hook #'smartparens-mode)
-  (require 'lsp-mode)
-  (require 'lsp-vue)
-  (add-hook 'vue-mode-hook #'lsp-vue-mmm-enable)
-  (with-eval-after-load 'lsp-mode
-    (require 'lsp-flycheck))
+  (require 'yasnippet)
   (require 'company-lsp)
+  (setq python-shell-interpreter "python.exe")
   (push 'company-lsp company-backends)
-  )
+  (with-eval-after-load 'lsp-mode
+    (pyenv-mode 1)
+    ))
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
@@ -499,9 +507,7 @@ This function is called at the very end of Spacemacs initialization."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   (quote
-    (yapfify stickyfunc-enhance pytest pyenv-mode py-isort pippel pipenv pyvenv pip-requirements lsp-python-ms python live-py-mode importmagic epc ctable concurrent deferred helm-pydoc helm-cscope xcscope cython-mode company-anaconda blacken anaconda-mode pythonic yasnippet-snippets web-beautify smeargle prettier-js nodejs-repl magit-svn magit-gitflow magit-popup livid-mode skewer-mode simple-httpd json-navigator hierarchy json-mode json-snatcher json-reformat js2-refactor multiple-cursors js2-mode js-doc helm-gitignore helm-git-grep helm-company helm-c-yasnippet gitignore-templates gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe+ git-gutter-fringe fringe-helper git-gutter+ git-gutter fuzzy evil-magit magit transient git-commit with-editor diff-hl company-tern dash-functional tern company-statistics browse-at-remote auto-yasnippet yasnippet ac-ispell auto-complete helm-gtags godoctor go-tag go-rename go-impl go-guru go-gen-test go-fill-struct go-eldoc ggtags flycheck-gometalinter flycheck-golangci-lint counsel-gtags counsel swiper ivy company-go go-mode company ws-butler writeroom-mode winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package treemacs-projectile treemacs-evil toc-org symon symbol-overlay string-inflection spaceline-all-the-icons restart-emacs request rainbow-delimiters popwin persp-mode pcre2el password-generator paradox overseer org-plus-contrib org-bullets open-junk-file nameless move-text macrostep lorem-ipsum link-hint indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation helm-xref helm-themes helm-swoop helm-purpose helm-projectile helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio font-lock+ flycheck-package flx-ido fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-textobj-line evil-surround evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens evil-args evil-anzu eval-sexp-fu elisp-slime-nav editorconfig dumb-jump dotenv-mode doom-modeline diminish devdocs define-word column-enforce-mode clean-aindent-mode centered-cursor-mode auto-highlight-symbol auto-compile aggressive-indent ace-link ace-jump-helm-line))))
+ '(python-shell-interpreter-args "-i"))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
