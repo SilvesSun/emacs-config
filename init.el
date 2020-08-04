@@ -1,12 +1,12 @@
 (require 'package)
-(setq package-archives '(("gnu"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
-                         ("melpa" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")
+(setq package-archives '(("melpa-cn" . "http://elpa.emacs-china.org/melpa/")
+			 ("gnu-cn"   . "http://elpa.emacs-china.org/gnu/")
 			 ("org" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/org/")
 			 ))
 (package-initialize) ;;
 ;; 关闭工具栏，tool-bar-mode 即为一个 Minor Mode
 (tool-bar-mode -1)
-
+(global-hi-lock-mode 1)
 (menu-bar-mode 0)
 ;; 关闭文件滑动控件
 (scroll-bar-mode -1)
@@ -19,7 +19,6 @@
 (global-linum-mode 1)
 (electric-pair-mode 1)
 (show-paren-mode 1)
-
 (setq auto-save-default nil)
 ;; reduce the frequency of garbage collection by making it happen on
 ;; each 50MB of allocated data (the default is on every 0.76MB)
@@ -31,6 +30,11 @@
 ;; disable the annoying bell ring
 (setq ring-bell-function 'ignore)
 
+
+;; region selected and copy
+(setq mouse-drag-copy-region t)
+
+(require 'org)
 ;; disable startup screen
 (setq inhibit-startup-screen t)
 ;; enable y/n answers
@@ -50,6 +54,34 @@
       helm-recentf-fuzzy-match    t)
 (setq helm-M-x-fuzzy-match t)
 (global-set-key (kbd "C-s") 'helm-occur)
+(global-set-key (kbd "C-<tab>") 'previous-buffer)
+
+
+;;yasnippet
+(setq yas-snippet-dirs '("c:/users/sk.sun/yasippet"))
+(yas-global-mode 1)
+
+;; cnfont
+(use-package cnfonts
+  :ensure t
+  :config
+  (cnfonts-enable)
+  )
+(use-package rust-mode
+  :ensure t
+  )
+
+(use-package projectile)
+(use-package csv-mode
+  :ensure t)
+(use-package awesome-tab
+  :load-path "D:/tools/awesome-tab"
+  :config
+  (awesome-tab-mode t))
+
+(awesome-tab-build-helm-source)
+(use-package all-the-icons
+  )
 
 (require 'use-package)
 (setq use-package-verbose t)
@@ -58,7 +90,7 @@
 (use-package company-tabnine :ensure t)
 (add-to-list 'company-backends #'company-tabnine)
 ;; Trigger completion immediately.
-(setq company-idle-delay 0.2)
+(setq company-idle-delay 0.5)
 
 ;; Number the candidates (use M-1, M-2 etc to select completions).
 (setq company-show-numbers t)
@@ -82,6 +114,12 @@
     "aoc" 'org-capture
     "aoki" 'org-clock-in
     "aoko" 'org-clock-out
+    "aos" 'org-archive-subtree
+    ;;buffer settings
+    "TAB" 'switch-to-next-buffer
+    "bb" 'switch-to-buffer
+    "bp" 'switch-to-prev-buffer
+    "bk" 'kill-buffer
     )
   )
 (use-package evil
@@ -198,9 +236,13 @@
   :bind (("C-x g" . 'google-this-mode-submap))
   )
 
+(use-package ob-ipython
+  :ensure t)
+
 (google-this-mode 1)
 (require 'org-bullets)
 (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+
 ;; org mode custom
 ;; 打开 org-indent mode
 ;;(setq org-startup-indented t)
@@ -214,13 +256,21 @@
 (global-set-key (kbd "C-c c") 'org-capture)
 ;; 配置归档文件的名称和Headline格式
 
+(setq python-shell-interpreter "ipython"
+      python-shell-interpreter-args "-i --simple-prompt")
+(setq org-babel-python-command "C:/Users/sk.sun/AppData/Local/conda/conda/envs/scrapy/python.exe")
 ;; Python source code blocks in Org Mode
 (org-babel-do-load-languages
  'org-babel-load-languages
- '((python . t)
+ '((ipython . t)
    (emacs-lisp . t)
-   (sh . t)
+   (shell . t)
+   (rust . t)
    ))
+
+;; org style settings
+;; hide the emphasis markup
+(setq org-hide-emphasis-markers t)
 
 ;; 取消每次运行代码时的确认
 (setq org-confirm-babel-evaluate nil)
@@ -240,6 +290,13 @@
                                 ("HAND" . (:foreground "white" :background "#2E8B57"  :weight bold))
                                 ("DONE" . (:foreground "white" :background "#3498DB" :weight bold))))
 
+;; 让中文也可以不加空格就使用行内格式
+(setcar (nthcdr 0 org-emphasis-regexp-components) " \t('\"{[:nonascii:]")
+(setcar (nthcdr 1 org-emphasis-regexp-components) "- \t.,:!?;'\")}\\[[:nonascii:]")
+(org-set-emph-re 'org-emphasis-regexp-components org-emphasis-regexp-components)
+(org-element-update-syntax)
+;; 规定上下标必须加 {}，否则中文使用下划线时它会以为是两个连着的下标
+(setq org-use-sub-superscripts "{}")
 ;; agenda 里面时间块彩色显示
 ;; From: https://emacs-china.org/t/org-agenda/8679/3
 (defun sk/org-agenda-time-grid-spacing ()
@@ -265,6 +322,8 @@
             (overlay-put ov 'line-height line-height)
             (overlay-put ov 'line-spacing (1- line-height))))))))
 
+(server-start)
+
 (add-hook 'org-agenda-finalize-hook #'sk/org-agenda-time-grid-spacing)
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -277,7 +336,9 @@
  '(org-agenda-files (quote ("d:/工作文档/gtd.org_archive" "d:/工作文档/gtd.org")))
  '(package-selected-packages
    (quote
-    (org-gnome org-bullets google-this treemacs-magit treemacs-icons-dired treemacs-projectile treemacs-evil treemacs lv powershell powerline-evil smart-mode-line-powerline-theme spaceline-all-the-icons spaceline helm-lsp helm which-key evil-leader highlight-parentheses company-tabnine use-package spacemacs-theme))))
+    (ob-async yasnippet ob-rust cnfonts csv-mode org-gnome org-bullets google-this treemacs-magit treemacs-icons-dired treemacs-projectile treemacs-evil treemacs lv powershell powerline-evil smart-mode-line-powerline-theme spaceline-all-the-icons spaceline helm-lsp helm which-key evil-leader highlight-parentheses company-tabnine use-package spacemacs-theme)))
+ '(python-shell-virtualenv-root
+   "C:/Users/sk.sun/AppData/Local/conda/conda/envs/scrapy/python.exe"))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
